@@ -12,7 +12,7 @@ if __name__ == "__main__":
     # model = tf.keras.models.load_model('E:\VsCode\my_model.h5')
 
     #加载图像文件并将其转换为模型所需的格式
-    image = Image.open('7281677746801_.pic.jpg').convert('L')
+    image = Image.open('mypics/3_1.png').convert('L')
     image = image.resize((28, 28))
     image_array = np.array(image)
     image_array = image_array.reshape((1, 28, 28, 1))

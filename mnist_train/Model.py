@@ -2,6 +2,7 @@ import tensorflow as tf
 import datetime
 import numpy
 from PIL import Image
+import os
 
 
 class Model:
@@ -27,12 +28,12 @@ class Model:
                                                            save_weights_only=True,
                                                            verbose=1)
         (x_train, y_train), (x_test, y_test) = self.mnist.load_data()
-
-        image = Image.open('7281677746801_.pic.jpg').convert('L')
-        image = image.resize((28, 28))
-        image_array = numpy.array(image)
-        image_array = image_array.reshape((1, 28, 28))
-        x_train = numpy.append(x_train, image_array, axis=0)
+        allpicinfo = self.loadAllPics('/home/qinxizhou/work/git/tensorflowplayground/mnist_train/mypics')
+        for index, item in enumerate(allpicinfo[0]):
+            x_train = numpy.append(x_train, allpicinfo[0][index], axis=0)
+            y_train = numpy.append(y_train, allpicinfo[1][index])
+            x_test = numpy.append(x_test, allpicinfo[0][index], axis=0)
+            y_test = numpy.append(y_test, allpicinfo[1][index])
         x_train, x_test = x_train / 255.0, x_test / 255.0
         model.fit(x=x_train,
                   y=y_train,
@@ -53,16 +54,28 @@ class Model:
 
     def predictMy(self, array):
         loaded_model = tf.keras.models.load_model('model/m')
-        with numpy.load('/home/qinxizhou/work/git/mnist.npz') as data:
-            train_examples = data['x_train']
-            train_labels = data['y_train']
-            test_examples = data['x_test']
-            test_labels = data['y_test']
         predictions = loaded_model.predict(array)
+        print(predictions)
         print(numpy.argmax(predictions))
 
-    def LoadAllPics(self, path):
-        ## TODO
+    def loadAllPics(self, path):
+        files = os.listdir(path)
+        retxVal = []
+        retyVal = []
+        for aFile in files:
+            image = Image.open(path + '/' + aFile).convert('L')
+            image = image.resize((28, 28))
+            image_array = numpy.array(image)
+            image_array = image_array.reshape((1, 28, 28))
+            retxVal.append(image_array)
+            retyVal.append(self.extractNum(aFile))
+        return [retxVal , retyVal]
+    
+    def extractNum(self, fileName):
+        nameArray = fileName.split('.')
+        name = nameArray[0]
+        name = name.split('_')[0]
+        return int(name)
 
 if __name__ == "__main__":
     m = Model()
